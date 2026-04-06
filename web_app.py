@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from typing import Dict, Any, List
 
@@ -101,5 +102,25 @@ def main() -> None:
         st.caption(f"Latency: {agent_result['latency_ms']} ms | Steps: {agent_result['steps']}")
 
 
+def _running_inside_streamlit() -> bool:
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+        return get_script_run_ctx() is not None
+    except Exception:
+        return False
+
+
+def _launch_streamlit_app() -> None:
+    from streamlit.web import cli as stcli
+
+    app_path = os.path.abspath(__file__)
+    sys.argv = ["streamlit", "run", app_path]
+    raise SystemExit(stcli.main())
+
+
 if __name__ == "__main__":
-    main()
+    if _running_inside_streamlit():
+        main()
+    else:
+        _launch_streamlit_app()
