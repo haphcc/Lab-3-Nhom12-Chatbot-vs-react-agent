@@ -1,0 +1,67 @@
+{
+  "gia vang hom nay": [
+    {
+      "title": "Gia vang SJC ngay 06/04/2026",
+      "snippet": "Gia vang SJC duoc ghi nhan o muc 90.000.000 VND/luong.",
+      "source": "baochinhphu.vn"
+    },
+    {
+      "title": "Thi truong vang trong nuoc",
+      "snippet": "Gia vang giu xu huong on dinh trong phien giao dich sang nay.",
+      "source": "vnexpress.net"
+    },
+    {
+      "title": "Tong hop gia vang hom nay",
+      "snippet": "Nhieu doanh nghiep niem yet gia ban quanh moc 90 trieu dong/luong.",
+      "source": "cafef.vn"
+    }
+  ],
+  "gia vang hom nay|source:baochinhphu": [
+    {
+      "title": "Gia vang SJC ngay 06/04/2026",
+      "snippet": "Theo Bao Chinh phu, gia vang SJC la 90.000.000 VND/luong.",
+      "source": "baochinhphu.vn"
+    }
+  ],
+  "gia vang hom nay|source:vnexpress": [
+    {
+      "title": "Gia vang trong nuoc cap nhat",
+      "snippet": "Theo VnExpress, gia vang SJC la 90.000.000 VND/luong.",
+      "source": "vnexpress.net"
+    }
+  ],
+  "thoi tiet ha noi": [
+    {
+      "title": "Du bao thoi tiet Ha Noi",
+      "snippet": "Ha Noi troi nang dep, nhiet do tu 25-30 do C.",
+      "source": "nchmf.gov.vn"
+    },
+    {
+      "title": "Cap nhat thoi tiet theo gio",
+      "snippet": "Buoi trua nong nhe, chieu toi co gio mat.",
+      "source": "vtv.vn"
+    },
+    {
+      "title": "Chat luong khong khi tai Ha Noi",
+      "snippet": "Chi so AQI o muc trung binh trong ngay.",
+      "source": "iqair.com"
+    }
+  ],
+  "thu tuong nhat ban hien tai": [
+    {
+      "title": "Thong tin Thu tuong Nhat Ban duong nhiem",
+      "snippet": "Thu tuong duong nhiem cua Nhat Ban la ong Shigeru Ishiba.",
+      "source": "japan.go.jp"
+    },
+    {
+      "title": "Ho so lanh dao Nhat Ban",
+      "snippet": "Shigeru Ishiba giu vai tro Thu tuong trong nhiem ky hien tai.",
+      "source": "wikipedia.org"
+    },
+    {
+      "title": "Tong hop tin tuc Nhat Ban",
+      "snippet": "Cac ban tin gan day xac nhan Thu tuong la Shigeru Ishiba.",
+      "source": "reuters.com"
+    }
+  ]
+}
