@@ -27,8 +27,9 @@ TOOLS = [
         "name": "search",
         "func": web_search,
         "description": (
-            "Tim kiem thong tin tren web tu mock data. Output la top ket qua lien quan "
-            "(tieu de + snippet + source). Su dung khi can thong tin thoi su, su kien, du lieu moi nhat."
+            "Tim kiem thong tin tren web. Neu bat SEARCH_USE_API thi uu tien SerpAPI/DuckDuckGo, "
+            "neu khong thi dung mock data. Output la top ket qua lien quan (tieu de + snippet + source). "
+            "Su dung khi can thong tin thoi su, su kien, du lieu moi nhat."
         ),
         "input_format": "string",
         "example": "search('Dan so Viet Nam 2024')",
