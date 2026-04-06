@@ -1,0 +1,27 @@
+[
+    {
+      "category": "factual",
+      "question": "Thủ đô của Việt Nam là gì?",
+      "expected": "Hà Nội"
+    },
+    {
+      "category": "current",
+      "question": "Tỷ giá USD/VND hôm nay?",
+      "expected": "unknown"
+    },
+    {
+      "category": "reasoning",
+      "question": "So sánh diện tích Việt Nam và Thái Lan, nước nào lớn hơn?",
+      "expected": "Thailand"
+    },
+    {
+      "category": "calculation",
+      "question": "100 USD bằng bao nhiêu VND nếu tỷ giá 25,000?",
+      "expected": "2500000"
+    },
+    {
+      "category": "verification",
+      "question": "Hà Nội có phải thành phố lớn nhất Việt Nam không?",
+      "expected": "false"
+    }
+  ]
