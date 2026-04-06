@@ -27,22 +27,52 @@ class ReActAgent:
             [f"- {t['name']}: {t['description']}" for t in self.tools]
         )
         return f"""
-        You are an intelligent assistant. You have access to the following tools:
+        You are an intelligent assistant with tool-use capabilities.
+        Your primary goal is to produce a high-quality final answer, not just intermediate reasoning.
+
+        Available tools:
         {tool_descriptions}
 
-        Use the following format:
-        Thought: your line of reasoning.
+        Required format:
+        Thought: brief reasoning for the next step.
         Action: tool_name("single string argument")
-        Observation: result of the tool call.
-        ... (repeat Thought/Action/Observation if needed)
-        Final Answer: your final response.
+        Observation: result of the tool call (provided by system)
+        ... repeat if needed ...
+        Final Answer: complete response for the user.
 
         Rules:
-        - Use a tool only when it is needed.
-        - If you call a tool, wait for the Observation before deciding the next step.
-        - Keep the Action on one line.
-        - If you can answer directly, respond with Final Answer.
+        - Use at most one tool per step.
+        - If a tool is needed, wait for Observation before next action.
+        - Keep Action on one line.
+        - Prefer evidence-based answers from observations when available.
+        - Final Answer should be clear, specific, and useful (not one short vague sentence).
+        - Match the user's language.
         """
+
+    def _build_synthesis_prompt(self) -> str:
+        return (
+            "You are a careful assistant that writes the final user-facing answer from ReAct traces. "
+            "Use the provided observations when possible, avoid exposing chain-of-thought, and avoid tool syntax. "
+            "Answer directly and clearly with enough detail to be useful. "
+            "If information is uncertain or missing, explicitly say what is uncertain. "
+            "Match the user's language."
+        )
+
+    def _synthesize_final_answer(self, user_input: str, scratchpad: str, latest_response: str) -> str:
+        synthesis_input = (
+            f"User question: {user_input}\n\n"
+            f"ReAct trace:\n{scratchpad}\n"
+            f"Latest model response:\n{latest_response}\n\n"
+            "Write only the final answer for the user."
+        )
+        result = self.llm.generate(synthesis_input, system_prompt=self._build_synthesis_prompt())
+        tracker.track_request(
+            provider=result.get("provider", "unknown"),
+            model=self.llm.model_name,
+            usage=result.get("usage", {}),
+            latency_ms=result.get("latency_ms", 0),
+        )
+        return result.get("content", "").strip()
 
     def run(self, user_input: str) -> str:
         """
@@ -96,7 +126,8 @@ class ReActAgent:
 
         if not final_answer:
             if "response" in locals() and response:
-                final_answer = response
+                synthesized = self._synthesize_final_answer(user_input, scratchpad, response)
+                final_answer = synthesized or response
             else:
                 final_answer = "I could not produce a final answer within the step limit."
 
