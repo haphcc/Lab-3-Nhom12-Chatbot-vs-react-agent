@@ -1,0 +1,141 @@
+{
+  "total_failure_cases": 10,
+  "failure_type_breakdown": {
+    "no_results": 1,
+    "ineffective_refinement": 1,
+    "low_source_diversity": 2,
+    "low_relevance": 1,
+    "incomplete_reasoning": 4,
+    "tool_selection_error": 1
+  },
+  "sessions_with_failures": [
+    3,
+    5,
+    6,
+    7,
+    8
+  ],
+  "cases": [
+    {
+      "session_id": 3,
+      "failure_type": "no_results",
+      "query": "search engine citation best practices",
+      "source": "derived",
+      "details": {
+        "results_count": 0,
+        "source_diversity": 0
+      },
+      "root_cause": "Search query returned no matching results from the selected provider.",
+      "recommended_action": "Broaden the query, normalize wording, or expand indexed data sources."
+    },
+    {
+      "session_id": 3,
+      "failure_type": "ineffective_refinement",
+      "query": "search engine citation best practices",
+      "source": "derived",
+      "details": {
+        "previous_results": 0,
+        "refined_results": 0,
+        "refined_query": "nghien cuu ve citation trong academic search"
+      },
+      "root_cause": "Query reformulation did not improve retrieval quality or result count.",
+      "recommended_action": "Add query rewrite templates and compare before/after retrieval quality."
+    },
+    {
+      "session_id": 5,
+      "failure_type": "low_source_diversity",
+      "query": "tin tuc ai moi nhat",
+      "source": "derived",
+      "details": {
+        "source_diversity": 1,
+        "results_count": 3
+      },
+      "root_cause": "Answer depended on too few unique sources, increasing bias risk.",
+      "recommended_action": "Pull results from additional domains before synthesis."
+    },
+    {
+      "session_id": 6,
+      "failure_type": "low_relevance",
+      "query": "ai startup funding headline",
+      "source": "derived",
+      "details": {
+        "relevance_score": 0.25,
+        "results_count": 4
+      },
+      "root_cause": "Returned results only weakly matched the user intent.",
+      "recommended_action": "Tighten query intent extraction and add stronger query rewriting."
+    },
+    {
+      "session_id": 6,
+      "failure_type": "incomplete_reasoning",
+      "query": "Tim tong quan ve startup AI nhung ket qua chua sat cau hoi.",
+      "source": "derived",
+      "details": {
+        "completeness_score": 0.62,
+        "source_diversity": 4
+      },
+      "root_cause": "The search flow stopped before collecting enough evidence to answer all parts of the question.",
+      "recommended_action": "Trigger an extra search hop when completeness stays low."
+    },
+    {
+      "session_id": 7,
+      "failure_type": "incomplete_reasoning",
+      "query": "So sanh hai chi so kinh te can nhieu buoc nhung agent dung som.",
+      "source": "derived",
+      "details": {
+        "completeness_score": 0.45,
+        "source_diversity": 2
+      },
+      "root_cause": "The search flow stopped before collecting enough evidence to answer all parts of the question.",
+      "recommended_action": "Trigger an extra search hop when completeness stays low."
+    },
+    {
+      "session_id": 7,
+      "failure_type": "incomplete_reasoning",
+      "query": "chi so kinh te quy 1 vietnam",
+      "source": "explicit",
+      "details": {
+        "planned_hops": 3,
+        "completed_hops": 1
+      },
+      "root_cause": "The search flow stopped before collecting enough evidence to answer all parts of the question.",
+      "recommended_action": "Trigger an extra search hop when completeness stays low."
+    },
+    {
+      "session_id": 8,
+      "failure_type": "low_source_diversity",
+      "query": "thu tuong nhat ban hom nay wikipedia",
+      "source": "derived",
+      "details": {
+        "source_diversity": 1,
+        "results_count": 2
+      },
+      "root_cause": "Answer depended on too few unique sources, increasing bias risk.",
+      "recommended_action": "Pull results from additional domains before synthesis."
+    },
+    {
+      "session_id": 8,
+      "failure_type": "incomplete_reasoning",
+      "query": "Hoi ve tin moi nhung workflow lai dua vao nguon khong phu hop.",
+      "source": "derived",
+      "details": {
+        "completeness_score": 0.55,
+        "source_diversity": 1
+      },
+      "root_cause": "The search flow stopped before collecting enough evidence to answer all parts of the question.",
+      "recommended_action": "Trigger an extra search hop when completeness stays low."
+    },
+    {
+      "session_id": 8,
+      "failure_type": "tool_selection_error",
+      "query": "thu tuong nhat ban hom nay wikipedia",
+      "source": "explicit",
+      "details": {
+        "selected_tool": "wikipedia",
+        "expected_tool": "search"
+      },
+      "root_cause": "The workflow appears to have relied on the wrong retrieval path for the question type.",
+      "recommended_action": "Improve tool-routing rules for current-event versus encyclopedia queries."
+    }
+  ]
+}

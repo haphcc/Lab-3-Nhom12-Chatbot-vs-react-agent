@@ -139,16 +139,69 @@ def _plot_refinement_effectiveness(refinement_items: List[Dict], output_dir: str
     return out_path
 
 
+def _plot_failure_breakdown(failure_summary: Dict, output_dir: str) -> str:
+    breakdown = failure_summary.get("failure_type_breakdown", {}) if failure_summary else {}
+    if not breakdown:
+        breakdown = {"no_failures": 1}
+
+    labels = list(breakdown.keys())
+    values = [breakdown[label] for label in labels]
+
+    plt.figure(figsize=(9, 5))
+    plt.bar(labels, values, color="#d62728")
+    plt.title("Failure Type Breakdown")
+    plt.xlabel("Failure Type")
+    plt.ylabel("Count")
+    plt.xticks(rotation=30, ha="right")
+    plt.tight_layout()
+
+    out_path = os.path.join(output_dir, "failure_breakdown.png")
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    return out_path
+
+
+def _plot_multi_hop_comparison(multi_hop_summary: Dict, output_dir: str) -> str:
+    labels = ["Multi-hop", "Single-hop"]
+    search_values = [
+        _to_float(multi_hop_summary.get("avg_searches_multi_hop"), 0.0),
+        _to_float(multi_hop_summary.get("avg_searches_single_hop"), 0.0),
+    ]
+    completeness_values = [
+        _to_float(multi_hop_summary.get("avg_completeness_multi_hop"), 0.0),
+        _to_float(multi_hop_summary.get("avg_completeness_single_hop"), 0.0),
+    ]
+
+    x_positions = range(len(labels))
+    plt.figure(figsize=(8, 5))
+    plt.bar([x - 0.18 for x in x_positions], search_values, width=0.36, label="Avg Searches", color="#1f77b4")
+    plt.bar([x + 0.18 for x in x_positions], completeness_values, width=0.36, label="Avg Completeness", color="#ff7f0e")
+    plt.xticks(list(x_positions), labels)
+    plt.title("Multi-hop vs Single-hop")
+    plt.ylabel("Metric Value")
+    plt.legend()
+    plt.tight_layout()
+
+    out_path = os.path.join(output_dir, "multi_hop_comparison.png")
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    return out_path
+
+
 def build_dashboard(analysis_dir: str) -> Dict[str, str]:
     summary_path = os.path.join(analysis_dir, "search_metrics_summary.json")
     session_csv = os.path.join(analysis_dir, "session_metrics.csv")
     matrix_csv = os.path.join(analysis_dir, "tool_usage_matrix.csv")
     refinement_json = os.path.join(analysis_dir, "query_refinement_report.json")
+    failure_summary_json = os.path.join(analysis_dir, "search_failure_summary.json")
+    multi_hop_json = os.path.join(analysis_dir, "multi_hop_analysis.json")
 
     summary = _read_json(summary_path) if os.path.exists(summary_path) else {}
     session_rows = _read_csv(session_csv)
     matrix_rows = _read_csv(matrix_csv)
     refinement = _read_json(refinement_json).get("items", []) if os.path.exists(refinement_json) else []
+    failure_summary = _read_json(failure_summary_json) if os.path.exists(failure_summary_json) else {}
+    multi_hop_summary = _read_json(multi_hop_json) if os.path.exists(multi_hop_json) else {}
 
     charts = {
         "search_count_distribution": _plot_search_count_distribution(session_rows, analysis_dir),
@@ -156,6 +209,8 @@ def build_dashboard(analysis_dir: str) -> Dict[str, str]:
         "tool_usage_heatmap": _plot_tool_usage_heatmap(matrix_rows, analysis_dir),
         "quality_scatter": _plot_quality_scatter(session_rows, analysis_dir),
         "query_refinement_effectiveness": _plot_refinement_effectiveness(refinement, analysis_dir),
+        "failure_breakdown": _plot_failure_breakdown(failure_summary, analysis_dir),
+        "multi_hop_comparison": _plot_multi_hop_comparison(multi_hop_summary, analysis_dir),
     }
 
     dashboard_md = os.path.join(analysis_dir, "dashboard.md")
@@ -177,7 +232,11 @@ def build_dashboard(analysis_dir: str) -> Dict[str, str]:
         handle.write("### Relevance vs Completeness\n\n")
         handle.write("![Relevance vs Completeness](quality_scatter.png)\n\n")
         handle.write("### Query Refinement Effectiveness\n\n")
-        handle.write("![Query Refinement Effectiveness](query_refinement_effectiveness.png)\n")
+        handle.write("![Query Refinement Effectiveness](query_refinement_effectiveness.png)\n\n")
+        handle.write("### Failure Type Breakdown\n\n")
+        handle.write("![Failure Type Breakdown](failure_breakdown.png)\n\n")
+        handle.write("### Multi-hop vs Single-hop\n\n")
+        handle.write("![Multi-hop vs Single-hop](multi_hop_comparison.png)\n")
 
     charts["dashboard_markdown"] = dashboard_md
     return charts

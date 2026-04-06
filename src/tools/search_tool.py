@@ -1,13 +1,29 @@
 import json
 import os
+import time
 import unicodedata
 from pathlib import Path
 from typing import List, Dict, Any
 
 import requests
 
+from src.telemetry.search_monitor import search_monitor
+
 
 MOCK_SEARCH_PATH = Path(__file__).resolve().parent / "mock_data" / "search_results.json"
+
+
+def _infer_search_category(query: str) -> str:
+    normalized = _normalize_text(query)
+    if any(token in normalized for token in ["gia", "vang", "usd", "co phieu", "thi truong"]):
+        return "finance"
+    if any(token in normalized for token in ["thoi tiet", "nhiet do", "mua", "aqi"]):
+        return "weather"
+    if any(token in normalized for token in ["thu tuong", "tong thong", "lanh dao", "chinh tri"]):
+        return "politics"
+    if any(token in normalized for token in ["nghien cuu", "study", "citation", "paper", "tai lieu"]):
+        return "research"
+    return "general"
 
 
 def _normalize_text(text: str) -> str:
@@ -121,20 +137,26 @@ def _search_api(query: str) -> List[Dict[str, str]]:
     return []
 
 
-def _search_mock(query: str) -> str:
+def _search_mock(query: str) -> List[Dict[str, str]]:
     try:
         with MOCK_SEARCH_PATH.open("r", encoding="utf-8") as file:
             mock_db = json.load(file)
     except Exception as exc:
-        return f"Loi doc mock search data: {exc}"
+        return [
+            {
+                "title": "Mock data error",
+                "snippet": f"Loi doc mock search data: {exc}",
+                "source": "local-mock-db",
+            }
+        ]
 
     normalized_query = _normalize_text(query)
     for key, value in mock_db.items():
         if _normalize_text(key) in normalized_query:
             if isinstance(value, list):
-                return _format_results(value)
-            return _format_results([{"title": key, "snippet": str(value), "source": "mock-db"}])
-    return "Khong tim thay thong tin moi nhat cho yeu cau nay."
+                return value
+            return [{"title": key, "snippet": str(value), "source": "mock-db"}]
+    return []
 
 
 def web_search(query: str) -> str:
@@ -143,9 +165,38 @@ def web_search(query: str) -> str:
     Output duoc dinh dang string de phu hop ReAct parser don gian.
     """
     use_api = os.getenv("SEARCH_USE_API", "false").lower() in {"1", "true", "yes"}
-    if use_api:
-        api_results = _search_api(query)
-        if api_results:
-            return _format_results(api_results)
+    category = _infer_search_category(query)
+    start = time.time()
+    search_monitor.log_search_query(
+        user_query=query,
+        search_query=query,
+        step=1,
+        tool_name="search",
+        category=category,
+    )
 
-    return _search_mock(query)
+    results: List[Dict[str, str]] = []
+    if use_api:
+        results = _search_api(query)
+
+    if not results:
+        results = _search_mock(query)
+
+    latency_ms = int((time.time() - start) * 1000)
+    sources = [str(item.get("source", "unknown-source")) for item in results]
+    search_monitor.log_search_results(
+        search_query=query,
+        results_count=len(results),
+        relevant_count=len(results),
+        sources=sources,
+        latency_ms=latency_ms,
+    )
+
+    if not results:
+        search_monitor.log_search_failure(
+            failure_type="no_results",
+            query=query,
+            details={"category": category, "search_mode": "api" if use_api else "mock"},
+        )
+
+    return _format_results(results)

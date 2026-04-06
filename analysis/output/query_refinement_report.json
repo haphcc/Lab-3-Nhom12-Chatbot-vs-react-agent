@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "session_id": 2,
+      "original_query": "thoi tiet ha noi",
+      "refined_query": "thoi tiet ha noi chat luong khong khi",
+      "reason": "bo sung yeu to chat luong khong khi de tang do day du",
+      "improved": true,
+      "previous_results": 3,
+      "refined_results": 3
+    },
+    {
+      "session_id": 3,
+      "original_query": "search engine citation best practices",
+      "refined_query": "nghien cuu ve citation trong academic search",
+      "reason": "mo rong query ve academic citation",
+      "improved": false,
+      "previous_results": 0,
+      "refined_results": 0
+    }
+  ]
+}

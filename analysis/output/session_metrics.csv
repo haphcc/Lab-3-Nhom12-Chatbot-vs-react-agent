@@ -1,0 +1,11 @@
+session_id,user_query,category,search_count,avg_relevance,avg_completeness,avg_source_diversity,failed_search_rate,multi_hop,refinements,refinement_success_rate
+1,Gia vang hom nay la bao nhieu?,finance,1,1.0,0.95,3,0.0,False,0,
+2,Thoi tiet Ha Noi hom nay va chat luong khong khi the nao?,weather,2,1.0,0.88,3,0.0,True,1,1.0
+3,Cho toi tai lieu ve search engine citation best practices.,research,1,,,0,1.0,False,1,0.0
+4,Thu tuong Nhat Ban hien tai la ai?,politics,1,1.0,0.9,3,0.0,False,0,
+5,Tong hop nhanh tin AI tu mot nguon duy nhat.,general,1,1.0,0.74,1,0.0,False,0,
+6,Tim tong quan ve startup AI nhung ket qua chua sat cau hoi.,general,1,0.25,0.62,4,0.0,False,0,
+7,So sanh hai chi so kinh te can nhieu buoc nhung agent dung som.,finance,1,1.0,0.45,2,0.0,True,0,
+8,Hoi ve tin moi nhung workflow lai dua vao nguon khong phu hop.,politics,1,0.5,0.55,1,0.0,False,0,
+9,So sánh ưu/nhược điểm khi dùng ReAct Agent (gọi search tools) so với Chatbot trực tiếp cho câu hỏi: ‘Tóm tắt bằng chứng gần nhất về hiệu quả vaccine mRNA so với vaccine vector trong năm 2024’ — nêu nguồn và liệu agent có cải thiện độ đầy đủ / độ tin cậy không?,unknown,0,,,,0.0,False,0,
+10,So sánh ưu/nhược điểm khi dùng ReAct Agent (gọi search tools) so với Chatbot trực tiếp cho câu hỏi: ‘Tóm tắt bằng chứng gần nhất về hiệu quả vaccine mRNA so với vaccine vector trong năm 2024’ — nêu nguồn và liệu agent có cải thiện độ đầy đủ / độ tin cậy không?,unknown,0,,,,0.0,False,0,

@@ -1,0 +1,8 @@
+{
+  "multi_hop_session_count": 2,
+  "single_hop_session_count": 8,
+  "avg_searches_multi_hop": 1.5,
+  "avg_searches_single_hop": 0.75,
+  "avg_completeness_multi_hop": 0.665,
+  "avg_completeness_single_hop": 0.752
+}

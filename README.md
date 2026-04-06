@@ -62,12 +62,68 @@ The code is designed as a **Production Prototype**. It includes:
 - **Robust Provider Pattern**: Easily extendable to any LLM API.
 - **Clean Skeletons**: Focus on the logic that matters—the agent's reasoning process.
 
-## Run Search Analysis
+## Search Monitoring Workflow
 
+### 1. Generate Demo Search Logs
+
+```bash
+python analysis/generate_demo_search_logs.py --output logs/sample.log
+```
+
+Lenh nay tao file `logs/sample.log` bang chinh `search_monitor` va `search_tool`, bao gom cac event:
+
+- `SEARCH_QUERY`
+- `SEARCH_RESULTS`
+- `MULTI_HOP_START`
+- `INFO_SYNTHESIS`
+- `QUERY_REFINEMENT`
+- `SEARCH_FAILURE`
+
+### 2. Run Search Analysis
+
+```bash
 python analysis/search_analyzer.py --log-dir logs --output-dir analysis/output
+```
 
-## Generate Dashboard Visualizations
+Artifacts duoc tao trong `analysis/output/`:
 
+- `search_metrics_summary.json`
+- `session_metrics.csv`
+- `tool_usage_matrix.csv`
+- `failure_cases.json`
+- `search_failure_summary.json`
+- `multi_hop_analysis.json`
+- `query_refinement_report.json`
+
+### 3. Generate Dashboard Visualizations
+
+```bash
 python analysis/search_dashboard.py --analysis-dir analysis/output
+```
+
+Dashboard se tao them:
+
+- `search_count_distribution.png`
+- `avg_searches_by_category.png`
+- `tool_usage_heatmap.png`
+- `quality_scatter.png`
+- `query_refinement_effectiveness.png`
+- `failure_breakdown.png`
+- `multi_hop_comparison.png`
+- `dashboard.md`
+
+### 4. Run Through Existing UI
+
+```bash
+streamlit run web_app.py
+```
+
+Trong UI, mo tab `Search Monitoring` va bam lan luot:
+
+1. `Generate Demo Logs`
+2. `Run Analyzer`
+3. `Build Dashboard`
+
+Tab nay se hien summary metrics va cac bieu do ngay trong giao dien.
 
 _Happy Coding! Let's build agents that actually work._
