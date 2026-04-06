@@ -5,8 +5,12 @@ from typing import Dict, Any, List
 import streamlit as st
 from dotenv import load_dotenv
 
+from analysis.generate_demo_search_logs import generate_demo_logs
+from analysis.search_analyzer import run_analysis
+from analysis.search_dashboard import build_dashboard
 from src.agent.agent import ReActAgent
 from src.cli_utils import RuntimeConfig, build_provider
+from src.telemetry.logger import logger
 from src.tools import TOOLS
 
 
@@ -51,54 +55,119 @@ def run_agent_answer(provider, prompt: str, max_steps: int) -> Dict[str, Any]:
     }
 
 
+def _render_analysis_outputs(analysis_dir: str) -> None:
+    summary_path = os.path.join(analysis_dir, "search_metrics_summary.json")
+    dashboard_md_path = os.path.join(analysis_dir, "dashboard.md")
+
+    st.subheader("Search Telemetry Outputs")
+    st.caption(f"Log file hien tai: {logger.get_current_log_file()}")
+
+    if os.path.exists(summary_path):
+        import json
+
+        with open(summary_path, "r", encoding="utf-8") as handle:
+            summary = json.load(handle)
+        st.json(summary)
+    else:
+        st.info("Chua co file summary. Hay chay tao log mau va analyzer truoc.")
+
+    chart_files = [
+        "search_count_distribution.png",
+        "avg_searches_by_category.png",
+        "tool_usage_heatmap.png",
+        "quality_scatter.png",
+        "query_refinement_effectiveness.png",
+        "failure_breakdown.png",
+        "multi_hop_comparison.png",
+    ]
+    for chart_name in chart_files:
+        chart_path = os.path.join(analysis_dir, chart_name)
+        if os.path.exists(chart_path):
+            st.image(chart_path, caption=chart_name, use_container_width=True)
+
+    if os.path.exists(dashboard_md_path):
+        with open(dashboard_md_path, "r", encoding="utf-8") as handle:
+            st.markdown(handle.read())
+
+
+def _render_monitoring_tab() -> None:
+    st.header("Search Monitoring Workspace")
+    st.write("Tao log mau, chay phan tich va xem dashboard ngay trong giao dien hien co.")
+
+    log_path = st.text_input("Telemetry log file", value=os.path.join("logs", "sample.log"))
+    analysis_dir = st.text_input("Analysis output dir", value=os.path.join("analysis", "output"))
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("1. Generate Demo Logs", use_container_width=True):
+            path = generate_demo_logs(log_path)
+            st.success(f"Da tao log demo: {path}")
+    with col2:
+        if st.button("2. Run Analyzer", use_container_width=True):
+            report = run_analysis(log_path, analysis_dir)
+            st.success("Da sinh file phan tich.")
+            st.json(report.get("overall", {}))
+    with col3:
+        if st.button("3. Build Dashboard", use_container_width=True):
+            outputs = build_dashboard(analysis_dir)
+            st.success("Da tao dashboard va bieu do.")
+            st.json(outputs)
+
+    st.divider()
+    _render_analysis_outputs(analysis_dir)
+
+
 def main() -> None:
     load_dotenv()
     st.set_page_config(page_title="Chatbot vs ReAct Agent", page_icon="🤖", layout="wide")
     st.title("Chatbot vs ReAct Agent")
     st.caption("Simple UI to compare direct chatbot answers and tool-using ReAct agent.")
 
-    with st.sidebar:
-        st.header("Settings")
-        provider_name = st.selectbox("Provider", ["openai", "google", "gemini", "local"], index=0)
-        default_model = os.getenv("DEFAULT_MODEL", "gpt-4o")
-        model_name = st.text_input("Model", value=default_model)
-        max_steps = st.slider("Max agent steps", min_value=1, max_value=10, value=5)
-        mode = st.radio("Mode", ["Agent", "Chatbot", "Compare"], index=0)
-        st.checkbox("Use search API (if configured)", key="search_api")
+    app_tab, monitor_tab = st.tabs(["Agent Playground", "Search Monitoring"])
 
-    os.environ["SEARCH_USE_API"] = "true" if st.session_state.get("search_api") else "false"
+    with app_tab:
+        with st.sidebar:
+            st.header("Settings")
+            provider_name = st.selectbox("Provider", ["openai", "google", "gemini", "local"], index=0)
+            default_model = os.getenv("DEFAULT_MODEL", "gpt-4o")
+            model_name = st.text_input("Model", value=default_model)
+            max_steps = st.slider("Max agent steps", min_value=1, max_value=10, value=5)
+            mode = st.radio("Mode", ["Agent", "Chatbot", "Compare"], index=0)
+            st.checkbox("Use search API (if configured)", key="search_api")
 
-    prompt = st.text_area("Your question", height=120, placeholder="Vi du: Gia vang hom nay la bao nhieu?")
-    run_clicked = st.button("Run", type="primary")
+        os.environ["SEARCH_USE_API"] = "true" if st.session_state.get("search_api") else "false"
 
-    if not run_clicked:
-        st.info("Nhap cau hoi va bam Run.")
-        return
+        prompt = st.text_area("Your question", height=120, placeholder="Vi du: Gia vang hom nay la bao nhieu?")
+        run_clicked = st.button("Run", type="primary")
 
-    if not prompt.strip():
-        st.warning("Hay nhap cau hoi truoc khi chay.")
-        return
+        if not run_clicked:
+            st.info("Nhap cau hoi va bam Run.")
+        elif not prompt.strip():
+            st.warning("Hay nhap cau hoi truoc khi chay.")
+        else:
+            try:
+                config = _build_runtime_config(provider_name, model_name, max_steps)
+                provider = build_provider(config)
+            except Exception as exc:
+                st.error(f"Khong the khoi tao provider: {exc}")
+            else:
+                if mode in {"Chatbot", "Compare"}:
+                    with st.spinner("Chatbot dang tra loi..."):
+                        chatbot_result = run_chatbot_answer(provider, prompt)
+                    st.subheader("Chatbot")
+                    st.write(chatbot_result["content"])
+                    st.caption(f"Latency: {chatbot_result['latency_ms']} ms")
 
-    try:
-        config = _build_runtime_config(provider_name, model_name, max_steps)
-        provider = build_provider(config)
-    except Exception as exc:
-        st.error(f"Khong the khoi tao provider: {exc}")
-        return
+                if mode in {"Agent", "Compare"}:
+                    with st.spinner("Agent dang suy luan va goi tools..."):
+                        agent_result = run_agent_answer(provider, prompt, max_steps=max_steps)
+                    st.subheader("ReAct Agent")
+                    st.write(agent_result["content"])
+                    st.caption(f"Latency: {agent_result['latency_ms']} ms | Steps: {agent_result['steps']}")
+                    st.caption(f"Telemetry log: {logger.get_current_log_file()}")
 
-    if mode in {"Chatbot", "Compare"}:
-        with st.spinner("Chatbot dang tra loi..."):
-            chatbot_result = run_chatbot_answer(provider, prompt)
-        st.subheader("Chatbot")
-        st.write(chatbot_result["content"])
-        st.caption(f"Latency: {chatbot_result['latency_ms']} ms")
-
-    if mode in {"Agent", "Compare"}:
-        with st.spinner("Agent dang suy luan va goi tools..."):
-            agent_result = run_agent_answer(provider, prompt, max_steps=max_steps)
-        st.subheader("ReAct Agent")
-        st.write(agent_result["content"])
-        st.caption(f"Latency: {agent_result['latency_ms']} ms | Steps: {agent_result['steps']}")
+    with monitor_tab:
+        _render_monitoring_tab()
 
 
 if __name__ == "__main__":
